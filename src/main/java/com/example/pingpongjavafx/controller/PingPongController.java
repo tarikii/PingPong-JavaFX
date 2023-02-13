@@ -120,6 +120,7 @@ public class PingPongController implements Initializable {
         startButton.setOnAction(event -> {
             initialize(null, null);
             timeline.play();
+            startButton.setVisible(false);
         });
     }
 
