@@ -1,16 +1,24 @@
 package com.example.pingpongjavafx.controller;
 
+import com.example.pingpongjavafx.PingPongGame;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -47,6 +55,7 @@ public class PingPongController implements Initializable {
         resetBall();
         moveLeftPaddle();
         moveRightPaddle();
+
     }
 
     public void moveBall() {
@@ -57,6 +66,8 @@ public class PingPongController implements Initializable {
         // Move the ball
         ball.setLayoutX(ball.getLayoutX() + ballSpeedX);
         ball.setLayoutY(ball.getLayoutY() + ballSpeedY);
+
+        checkGameOver();
 
         // Check for collisions with the paddles
         if (ball.getBoundsInParent().intersects(paddleRight.getBoundsInParent())) {
@@ -75,8 +86,21 @@ public class PingPongController implements Initializable {
         else if (ball.getLayoutX() + ball.getWidth() >= 600){
             resetBall();
             playerScore++;
-            if (playerScore % 5 == 0) {
-                ballSpeed += 3;
+            if (playerScore % 2 == 0) {
+                ballSpeedX *= 1.1;
+                ballSpeedY *= 1.2;
+
+                if(paddleLeft.getHeight() > 30){
+                    paddleLeft.setHeight(paddleLeft.getHeight()-15);
+                }
+
+                if(paddleRight.getHeight() > 55){
+                    paddleRight.setHeight(paddleRight.getHeight()-15);
+                }
+
+                System.out.println(paddleRight.getHeight());
+                System.out.println(paddleLeft.getHeight());
+
                 String gameLevelText = gameLevel.getText();
                 String levelNumberString = gameLevelText.replace("LEVEL ", "");
                 int gameLevelValue = Integer.parseInt(levelNumberString);
@@ -135,5 +159,32 @@ public class PingPongController implements Initializable {
             y = Math.max(0, Math.min(y, 400 - paddleRight.getHeight()));
             paddleRight.setLayoutY(y);
         }));
+    }
+
+    public void checkGameOver() {
+        String gameLevelText = gameLevel.getText();
+        String levelNumberString = gameLevelText.replace("LEVEL ", "");
+        int gameLevelValue = Integer.parseInt(levelNumberString);
+
+        if (gameLevelValue == 10) {
+            timeline.stop();
+            if (playerScore != IAScore) {
+                gameRunning = false;
+                if (playerScore > IAScore) {
+                    showGameOverWindow("The Human wins!");
+                } else {
+                    showGameOverWindow("Skynet wins!");
+                }
+            }
+        }
+    }
+
+    @FXML
+    private void showGameOverWindow(String resultGame) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(resultGame);
+        alert.setHeaderText(null);
+        alert.setContentText("You won the game! Congratulations!");
+        alert.show();
     }
 }
