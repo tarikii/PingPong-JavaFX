@@ -1,6 +1,7 @@
 module com.example.pingpongjavafx {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.media;
 
 
     opens com.example.pingpongjavafx to javafx.fxml;

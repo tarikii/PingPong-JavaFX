@@ -1,24 +1,19 @@
 package com.example.pingpongjavafx.controller;
 
-import com.example.pingpongjavafx.PingPongGame;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
-import java.io.IOException;
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -47,6 +42,14 @@ public class PingPongController implements Initializable {
     private int playerScore = 0;
     private int IAScore = 0;
 
+    Media score = new Media(new File("src/main/resources/sounds/score.mp3").toURI().toString());
+    Media computerHit = new Media(new File("src/main/resources/sounds/computer_hit.mp3").toURI().toString());
+    Media playerHit = new Media(new File("src/main/resources/sounds/player_hit.mp3").toURI().toString());
+    MediaPlayer mediaPlayerScore = new MediaPlayer(score);
+    MediaPlayer mediaPlayerComputerHit = new MediaPlayer(computerHit);
+    MediaPlayer mediaPlayerPlayerHit = new MediaPlayer(playerHit);
+
+
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -72,9 +75,13 @@ public class PingPongController implements Initializable {
         // Check for collisions with the paddles
         if (ball.getBoundsInParent().intersects(paddleRight.getBoundsInParent())) {
             ballSpeedX = -Math.abs(ballSpeedX);
+            mediaPlayerComputerHit.play();
+            mediaPlayerComputerHit.seek(Duration.ZERO);
         }
         if (ball.getBoundsInParent().intersects(paddleLeft.getBoundsInParent())) {
             ballSpeedX = Math.abs(ballSpeedX);
+            mediaPlayerPlayerHit.play();
+            mediaPlayerPlayerHit.seek(Duration.ZERO);
         }
 
 
@@ -82,6 +89,8 @@ public class PingPongController implements Initializable {
             resetBall();
             IAScore++;
             scoreRight.setText(Integer.toString(IAScore));
+            mediaPlayerScore.play();
+            mediaPlayerScore.seek(Duration.ZERO);
         }
         else if (ball.getLayoutX() + ball.getWidth() >= 600){
             resetBall();
@@ -94,7 +103,7 @@ public class PingPongController implements Initializable {
                     paddleLeft.setHeight(paddleLeft.getHeight()-15);
                 }
 
-                if(paddleRight.getHeight() > 55){
+                if(paddleRight.getHeight() > 30){
                     paddleRight.setHeight(paddleRight.getHeight()-15);
                 }
 
@@ -106,6 +115,8 @@ public class PingPongController implements Initializable {
                 int gameLevelValue = Integer.parseInt(levelNumberString);
                 gameLevel.setText("LEVEL " + (gameLevelValue + 1));
             }
+            mediaPlayerScore.play();
+            mediaPlayerScore.seek(Duration.ZERO);
             scoreLeft.setText(Integer.toString(playerScore));
             ball.setLayoutX(ball.getLayoutX() + ballSpeedX * ballSpeed);
             ball.setLayoutY(ball.getLayoutY() + ballSpeedY * ballSpeed);
@@ -169,14 +180,8 @@ public class PingPongController implements Initializable {
 
         if (gameLevelValue == 10) {
             timeline.stop();
-            if (playerScore != IAScore) {
-                gameRunning = false;
-                if (playerScore > IAScore) {
-                    showGameOverWindow("The Human wins!");
-                } else {
-                    showGameOverWindow("Skynet wins!");
-                }
-            }
+            gameRunning = false;
+            resetGame();
         }
     }
 
@@ -184,8 +189,32 @@ public class PingPongController implements Initializable {
     private void showGameOverWindow(String resultGame) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(resultGame);
-        alert.setHeaderText(null);
+        alert.setHeaderText("GAME OVER!");
         alert.setContentText("You won the game! Congratulations!");
         alert.show();
+    }
+
+    public void resetGame() {
+        if (playerScore != IAScore) {
+            if (playerScore > IAScore) {
+                showGameOverWindow("The Human wins!");
+            } else {
+                showGameOverWindow("Skynet wins!");
+            }
+        }
+
+        ballSpeedX = 2;
+        ballSpeedY = 2;
+        ballSpeed = 1.5;
+        playerScore = 0;
+        IAScore = 0;
+        scoreLeft.setText("0");
+        scoreRight.setText("0");
+        gameLevel.setText("LEVEL 1");
+        paddleLeft.setHeight(100);
+        paddleRight.setHeight(100);
+        paddleLeft.setLayoutY(200 - paddleLeft.getHeight() / 2);
+        paddleRight.setLayoutY(200 - paddleRight.getHeight() / 2);
+        startButton.setVisible(true);
     }
 }
