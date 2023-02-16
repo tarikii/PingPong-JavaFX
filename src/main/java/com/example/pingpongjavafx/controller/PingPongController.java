@@ -17,6 +17,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+//Controlador para hacer funcionar el juego
 public class PingPongController implements Initializable {
 
     @FXML
